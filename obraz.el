@@ -44,6 +44,14 @@
     (obraz:open-post file-path post-title tags-list)))
 
 
+(defun obraz:new-post-in-blog (post-title tags)
+  "Asks for post title and tags, and creates a new post file in a
+  blog location bound to *obraz:current-blog-location* dynamic variable."
+  (interactive "sPost title: \nsTags (white-space separated): ")
+  (when *obraz:current-blog-location*
+    (obraz:new-post *obraz:current-blog-location*  post-title tags)))
+
+
 (defun obraz:parse-header (header)
   (save-match-data
     (let* ((title (and (string-match "title: \\([^\r\n]+\\)" header)
@@ -103,6 +111,14 @@
                          'file   (get 'file p)
                          'face   `((:underline nil)))
           (goto-char (point-min))))
+      (let ((new-post-label (format "%s  %s\n" "---------- --:--:--" "< Write a new post >")))
+        (insert-button new-post-label
+                       'action (lambda (x)
+                                 (let ((*obraz:current-blog-location* (button-get x 'blog-path)))
+                                   (call-interactively 'obraz:new-post-in-blog)))
+                       'blog-path blog-path
+                       'face   `((:underline nil)))
+        (goto-char (point-min)))
       (read-only-mode 't)
       (set-buffer-modified-p nil)
       (if (fboundp 'hl-line-mode)
