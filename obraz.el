@@ -9,9 +9,22 @@
 (require 'button)
 
 
-(defvar obraz:post-template
+(defgroup obraz
+  nil
+  "Persistent settings of obraz.el package.")
+
+
+(defcustom obraz:post-template
   "---\ntitle: %s\ndate: %s\ntags: %s\nlayout: post\npublished: false\n\n---\n\n"
-  "Default template of a new post.")
+  "Default template of a new post."
+  :group 'obraz
+  :type 'string)
+
+
+(defcustom obraz:last-blog-location nil
+  "Path to the last edited Obraz blog."
+  :group 'obraz
+  :type 'directory)
 
 
 (defun obraz:insert-post-template (post-title tags-list)
@@ -31,9 +44,20 @@
       (obraz:insert-post-template post-title tags-list)))
 
 
+(defun obraz:save-last-blog-location (blog-path)
+  "Update obraz:last-blog-location setting."
+  (when (and blog-path (file-accessible-directory-p blog-path))
+    (set-variable 'obraz:last-blog-location (expand-file-name blog-path))))
+
+
 (defun obraz:new-post (blog-path post-title tags)
   "Ask path to blog, post title, tags, then create a new post file."
-  (interactive "DBlog location: \nsPost title: \nsTags (white-space separated): ")
+  (interactive
+   (list
+    (read-directory-name "Blog location: " obraz:last-blog-location)
+    (read-string "Post title: ")
+    (read-string "Tags (white-space-separated): ")))
+  ;; "DBlog location: \nsPost title: \nsTags (white-space separated): "
   (let* ((file-name (format "_posts/%s-%s.md"
                             (format-time-string "%Y-%m-%d")
                             (downcase (replace-regexp-in-string
@@ -41,15 +65,8 @@
          (file-path (expand-file-name file-name blog-path))
          (tags-list (mapcar #'downcase
                             (split-string tags "[^[:alpha:][:digit:]]"))))
+    (obraz:save-last-blog-location blog-path)
     (obraz:open-post file-path post-title tags-list)))
-
-
-(defun obraz:new-post-in-blog (post-title tags)
-  "Asks for post title and tags, and creates a new post file in a
-  blog location bound to *obraz:current-blog-location* dynamic variable."
-  (interactive "sPost title: \nsTags (white-space separated): ")
-  (when *obraz:current-blog-location*
-    (obraz:new-post *obraz:current-blog-location*  post-title tags)))
 
 
 (defun obraz:parse-header (header)
@@ -95,7 +112,9 @@
 
 (defun obraz:list-posts (blog-path)
   "List existing blog posts in reversed chronological order."
-  (interactive "DBlog location: ")
+  (interactive
+   (list
+    (read-directory-name "Blog location: " obraz:last-blog-location)))
   (cl-flet ((get (k alist) (cadr (assoc k alist)))
             (newest-first (a b) (string< (get 'date b) (get 'date a)))
             (trim (s) (replace-regexp-in-string "[ \t\"]+$" ""
@@ -114,8 +133,8 @@
       (let ((new-post-label (format "%s  %s\n" "---------- --:--:--" "< Write a new post >")))
         (insert-button new-post-label
                        'action (lambda (x)
-                                 (let ((*obraz:current-blog-location* (button-get x 'blog-path)))
-                                   (call-interactively 'obraz:new-post-in-blog)))
+                                 (let ((obraz:last-blog-location (button-get x 'blog-path)))
+                                   (call-interactively 'obraz:new-post)))
                        'blog-path blog-path
                        'face   `((:underline nil)))
         (goto-char (point-min)))
@@ -123,7 +142,8 @@
       (set-buffer-modified-p nil)
       (if (fboundp 'hl-line-mode)
           (hl-line-mode 't))
-      (toggle-truncate-lines 't))))
+      (toggle-truncate-lines 't)
+      (obraz:save-last-blog-location blog-path))))
 
 
 (provide 'obraz)
