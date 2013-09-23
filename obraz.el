@@ -48,6 +48,17 @@
   :type 'directory)
 
 
+(define-derived-mode obraz-toc-mode fundamental-mode "obraz-toc"
+  "Major mode for displaying a list of posts in an Obraz blog.")
+
+
+(add-hook 'obraz-toc-mode-hook
+          (lambda ()
+            (if (fboundp 'hl-line-mode)
+                (hl-line-mode 't))
+            (toggle-truncate-lines 't)))
+
+
 (defun obraz:insert-post-template (post-title tags-list)
   (let* ((escaped-title (prin1-to-string post-title))
          (now (format-time-string "%F %T"))
@@ -160,9 +171,7 @@
         (goto-char (point-min)))
       (read-only-mode 't)
       (set-buffer-modified-p nil)
-      (if (fboundp 'hl-line-mode)
-          (hl-line-mode 't))
-      (toggle-truncate-lines 't)
+      (obraz-toc-mode)
       (obraz:save-last-blog-location blog-path))))
 
 
