@@ -49,7 +49,6 @@
 
 
 (defun obraz:insert-post-template (post-title tags-list)
-  (interactive)
   (let* ((escaped-title (prin1-to-string post-title))
          (now (format-time-string "%F %T"))
          (tags-str (format "[ %s ]" (mapconcat #'identity tags-list ", ")))
