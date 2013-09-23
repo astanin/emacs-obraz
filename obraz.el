@@ -141,6 +141,17 @@
     (mapcar #'obraz:fix-date posts)))
 
 
+(defun obraz:new-toc-buffer (blog-path)
+  "Create a buffer for a new list of posts."
+  (let* ((buf (generate-new-buffer (concat "obraz:posts " blog-path))))
+    buf))
+
+
+(defun obraz:find-toc-buffer (blog-path)
+  "Find an open buffer with a list of posts."
+  (get-buffer (concat "obraz:posts " blog-path)))
+
+
 (defun obraz:list-posts (blog-path)
   "List existing blog posts in reversed chronological order."
   (interactive
@@ -152,7 +163,8 @@
                        (replace-regexp-in-string "^[ \t\"]+" "" s))))
     (let* ((posts (obraz:read-posts-meta blog-path))
            (sorted-posts (sort posts #'newest-first))
-           (buf(generate-new-buffer "obraz:posts")))
+           (buf (or (obraz:find-toc-buffer blog-path)
+                    (obraz:new-toc-buffer blog-path))))
       (switch-to-buffer buf)
       (dolist (p sorted-posts)
         (let ((label (format "%s  %s\n" (get 'date p) (trim (get 'title p)))))
