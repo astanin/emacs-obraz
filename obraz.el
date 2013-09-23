@@ -1,10 +1,31 @@
-;;; obraz.el --- Emacs assistance for static blogging (Obraz, Jekyll, etc)
-;;
+;;; obraz.el --- Managing a statically generated blog (Obraz, Jekyll, etc.)
+
 ;; Copyright (C) 2013 Sergey Astanin
+
+;; Author: Sergey Astanin <s.astanin@gmail.com>
+;; URL: https://github.com/astanin/obraz.el
+;; Version: 1.0-alpha1
+;; Keywords: convenience, outlines, wp
+;; License: MIT (see below)
+
+;;; Commentary:
+
+;; Obraz.el intends to facilitate use of Obraz static site
+;; generator (http://obraz.pirx.ru/), which is mostly compatible
+;; with Jekyll.  Hopefully, this package is usable with Jekyll
+;; (https://github.com/mojombo/jekyll) too.
 ;;
-;; License: BSD3
+;; The package provides two user-visible commands:
+;;
+;; * obraz:list-posts shows a list of written posts, and allows to
+;;   reopen the corresponding files in _posts/ or start writing a new
+;;   post.
+;;
+;; * obraz:new-post helps to create a new text file in _posts/ with a
+;;   proper file name derived from the current date, and post title.
 ;;
 
+;;; Code:
 
 (require 'button)
 
@@ -147,3 +168,25 @@
 
 
 (provide 'obraz)
+
+;; Copyright (C) 2013 Sergey Astanin
+
+;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;; of this software and associated documentation files (the "Software"), to deal
+;; in the Software without restriction, including without limitation the rights
+;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;; copies of the Software, and to permit persons to whom the Software is
+;; furnished to do so, subject to the following conditions:
+
+;; The above copyright notice and this permission notice shall be included in
+;; all copies or substantial portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+;; THE SOFTWARE.
+
+;;; obraz.el ends here
