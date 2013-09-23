@@ -152,32 +152,37 @@
   (get-buffer (concat "obraz:posts " blog-path)))
 
 
-(defun obraz:read-list-of-posts (blog-path)
+(defun obraz:read-list-of-posts (&optional blog-path)
   "(Re)reads the list of posts in reversed chronological order into the current buffer."
   (cl-flet ((get (k alist) (cadr (assoc k alist)))
             (newest-first (a b) (string< (get 'date b) (get 'date a)))
             (trim (s) (replace-regexp-in-string "[ \t\"]+$" ""
                        (replace-regexp-in-string "^[ \t\"]+" "" s))))
-    (let* ((posts (obraz:read-posts-meta blog-path))
+    (let* ((blog-path (or blog-path
+                          (when (boundp 'obraz:buffer-blog-path) obraz:buffer-blog-path)))
+           (posts (obraz:read-posts-meta blog-path))
            (sorted-posts (sort posts #'newest-first)))
-      (dolist (p sorted-posts)
-        (let ((label (format "%s  %s\n" (get 'date p) (trim (get 'title p)))))
-          (insert-button label
-                         'action (lambda (x) (obraz:open-post (button-get x 'file)))
-                         'file   (get 'file p)
+      (when blog-path
+        (setq buffer-read-only nil)
+        (delete-region (point-min) (point-max))
+        (dolist (p sorted-posts)
+          (let ((label (format "%s  %s\n" (get 'date p) (trim (get 'title p)))))
+            (insert-button label
+                           'action (lambda (x) (obraz:open-post (button-get x 'file)))
+                           'file   (get 'file p)
+                           'face   `((:underline nil)))
+            (goto-char (point-min))))
+        (let ((new-post-label (format "%s  %s\n" "---------- --:--:--" "< Write a new post >")))
+          (insert-button new-post-label
+                         'action (lambda (x)
+                                   (let ((obraz:last-blog-location (button-get x 'blog-path)))
+                                     (call-interactively 'obraz:new-post)))
+                         'blog-path blog-path
                          'face   `((:underline nil)))
-          (goto-char (point-min))))
-      (let ((new-post-label (format "%s  %s\n" "---------- --:--:--" "< Write a new post >")))
-        (insert-button new-post-label
-                       'action (lambda (x)
-                                 (let ((obraz:last-blog-location (button-get x 'blog-path)))
-                                   (call-interactively 'obraz:new-post)))
-                       'blog-path blog-path
-                       'face   `((:underline nil)))
-        (goto-char (point-min)))
-      (read-only-mode 't)
-      (set-buffer-modified-p nil)
-      (obraz-toc-mode))))
+          (goto-char (point-min)))
+        (setq buffer-read-only 't)
+        (set-buffer-modified-p nil)
+        (obraz-toc-mode)))))
 
 
 (defun obraz:list-posts (blog-path)
@@ -186,8 +191,10 @@
    (list
     (read-directory-name "Blog location: " obraz:last-blog-location)))
   (let* ((buf (or (obraz:find-toc-buffer blog-path)
-                  (obraz:new-toc-buffer blog-path))))
+                  (obraz:new-toc-buffer blog-path)))
+         (buf-path (make-local-variable 'obraz:buffer-blog-path)))
     (switch-to-buffer buf)
+    (setq obraz:buffer-blog-path blog-path)
     (obraz:read-list-of-posts blog-path)
     (obraz:save-last-blog-location blog-path)))
 
