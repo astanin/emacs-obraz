@@ -152,20 +152,14 @@
   (get-buffer (concat "obraz:posts " blog-path)))
 
 
-(defun obraz:list-posts (blog-path)
-  "List existing blog posts in reversed chronological order."
-  (interactive
-   (list
-    (read-directory-name "Blog location: " obraz:last-blog-location)))
+(defun obraz:read-list-of-posts (blog-path)
+  "(Re)reads the list of posts in reversed chronological order into the current buffer."
   (cl-flet ((get (k alist) (cadr (assoc k alist)))
             (newest-first (a b) (string< (get 'date b) (get 'date a)))
             (trim (s) (replace-regexp-in-string "[ \t\"]+$" ""
                        (replace-regexp-in-string "^[ \t\"]+" "" s))))
     (let* ((posts (obraz:read-posts-meta blog-path))
-           (sorted-posts (sort posts #'newest-first))
-           (buf (or (obraz:find-toc-buffer blog-path)
-                    (obraz:new-toc-buffer blog-path))))
-      (switch-to-buffer buf)
+           (sorted-posts (sort posts #'newest-first)))
       (dolist (p sorted-posts)
         (let ((label (format "%s  %s\n" (get 'date p) (trim (get 'title p)))))
           (insert-button label
@@ -183,8 +177,19 @@
         (goto-char (point-min)))
       (read-only-mode 't)
       (set-buffer-modified-p nil)
-      (obraz-toc-mode)
-      (obraz:save-last-blog-location blog-path))))
+      (obraz-toc-mode))))
+
+
+(defun obraz:list-posts (blog-path)
+  "List existing blog posts in reversed chronological order."
+  (interactive
+   (list
+    (read-directory-name "Blog location: " obraz:last-blog-location)))
+  (let* ((buf (or (obraz:find-toc-buffer blog-path)
+                  (obraz:new-toc-buffer blog-path))))
+    (switch-to-buffer buf)
+    (obraz:read-list-of-posts blog-path)
+    (obraz:save-last-blog-location blog-path)))
 
 
 (provide 'obraz)
