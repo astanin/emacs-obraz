@@ -52,13 +52,6 @@
   "Major mode for displaying a list of posts in an Obraz blog.")
 
 
-(add-hook 'obraz-toc-mode-hook
-          (lambda ()
-            (if (fboundp 'hl-line-mode)
-                (hl-line-mode 't))
-            (toggle-truncate-lines 't)))
-
-
 (defun obraz:insert-post-template (post-title tags-list)
   (let* ((escaped-title (prin1-to-string post-title))
          (now (format-time-string "%F %T"))
@@ -197,6 +190,20 @@
     (setq obraz:buffer-blog-path blog-path)
     (obraz:read-list-of-posts blog-path)
     (obraz:save-last-blog-location blog-path)))
+
+
+(add-hook 'obraz-toc-mode-hook
+          (lambda ()
+            (define-key obraz-toc-mode-map "n" 'next-line)
+            (define-key obraz-toc-mode-map "p" 'previous-line)
+            (define-key obraz-toc-mode-map "r" (lambda ()
+                                                 (interactive)
+                                                 (let ((lines (line-number-at-pos (point))))
+                                                   (obraz:read-list-of-posts)
+                                                   (forward-line (- lines 1)))))
+            (if (fboundp 'hl-line-mode)
+                (hl-line-mode 't))
+            (toggle-truncate-lines 't)))
 
 
 (provide 'obraz)
