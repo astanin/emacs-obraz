@@ -246,6 +246,8 @@
 
 (add-hook 'obraz-toc-mode-hook
           (lambda ()
+            (define-key obraz-toc-mode-map "b" 'obraz-build)
+            (define-key obraz-toc-mode-map "B" 'obraz-serve)
             (define-key obraz-toc-mode-map "n" 'next-line)
             (define-key obraz-toc-mode-map "p" 'previous-line)
             (define-key obraz-toc-mode-map "r" (lambda ()
