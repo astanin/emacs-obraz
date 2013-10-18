@@ -44,20 +44,20 @@
   "Persistent settings of obraz.el package.")
 
 
-(defcustom obraz:post-template
+(defcustom obraz-post-template
   "---\ntitle: %s\ndate: %s\ntags: %s\nlayout: post\npublished: false\n\n---\n\n"
   "Default template of a new post."
   :group 'obraz
   :type 'string)
 
 
-(defcustom obraz:last-blog-location nil
+(defcustom obraz-last-blog-location nil
   "Path to the last edited Obraz blog."
   :group 'obraz
   :type 'directory)
 
 
-(defcustom obraz:obraz-py-path ""
+(defcustom obraz-obraz-py-path ""
   "/path/to/obraz.py"
   :group 'obraz
   :type 'file)
