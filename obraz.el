@@ -48,6 +48,12 @@
   :type 'directory)
 
 
+(defcustom obraz:obraz-py-path ""
+  "/path/to/obraz.py"
+  :group 'obraz
+  :type 'file)
+
+
 (define-derived-mode obraz-toc-mode fundamental-mode "obraz-toc"
   "Major mode for displaying a list of posts in an Obraz blog.")
 
@@ -190,6 +196,43 @@
     (setq obraz:buffer-blog-path blog-path)
     (obraz:read-list-of-posts blog-path)
     (obraz:save-last-blog-location blog-path)))
+
+
+(defun obraz:build ()
+  "Build current blog."
+  (interactive)
+  (let* ((buffer-path (or (buffer-file-name) obraz:buffer-blog-path))
+         (blog-path   (file-name-directory
+                       (locate-dominating-file buffer-path "_posts")))
+         ;; TODO: quote whitespace in obraz-py-path and blog-path
+         (cmd         (mapconcat 'identity
+                                 `("python" ,obraz:obraz-py-path
+                                   "build"
+                                   "-s" ,blog-path
+                                   "-d" ,(concat blog-path "/_site/"))
+                                 " ")))
+    (message cmd)
+    (when blog-path
+       (compile cmd))))
+
+
+(defun obraz:serve ()
+  "Build and serve current blog."
+  (interactive)
+  (let* ((buffer-path (or (buffer-file-name) obraz:buffer-blog-path))
+         (blog-path   (file-name-directory
+                       (locate-dominating-file buffer-path "_posts")))
+         ;; TODO: quote whitespace in obraz-py-path and blog-path
+         (cmd         (mapconcat 'identity
+                                 `("python" ,obraz:obraz-py-path
+                                   "serve"
+                                   "-w"
+                                   "-s" ,blog-path
+                                   "-d" ,(concat blog-path "/_site/"))
+                                 " ")))
+    (message cmd)
+    (when blog-path
+       (compile cmd))))
 
 
 (add-hook 'obraz-toc-mode-hook
