@@ -67,33 +67,33 @@
   "Major mode for displaying a list of posts in an Obraz blog.")
 
 
-(defun obraz:insert-post-template (post-title tags-list)
+(defun obraz-insert-post-template (post-title tags-list)
   (let* ((escaped-title (prin1-to-string post-title))
          (now (format-time-string "%F %T"))
          (tags-str (format "[ %s ]" (mapconcat #'identity tags-list ", ")))
-         (header (format obraz:post-template escaped-title now tags-str)))
+         (header (format obraz-post-template escaped-title now tags-str)))
     (insert header)))
 
 
-(defun obraz:open-post (file-path &optional post-title tags-list)
+(defun obraz-open-post (file-path &optional post-title tags-list)
   "Open a new or an existing post file."
   (switch-to-buffer (find-file file-path))
   (if (and post-title
            (zerop (length (buffer-string))))
-      (obraz:insert-post-template post-title tags-list)))
+      (obraz-insert-post-template post-title tags-list)))
 
 
-(defun obraz:save-last-blog-location (blog-path)
-  "Update obraz:last-blog-location setting."
+(defun obraz-save-last-blog-location (blog-path)
+  "Update obraz-last-blog-location setting."
   (when (and blog-path (file-accessible-directory-p blog-path))
-    (set-variable 'obraz:last-blog-location (expand-file-name blog-path))))
+    (set-variable 'obraz-last-blog-location (expand-file-name blog-path))))
 
 
-(defun obraz:new-post (blog-path post-title tags)
+(defun obraz-new-post (blog-path post-title tags)
   "Ask path to blog, post title, tags, then create a new post file."
   (interactive
    (list
-    (read-directory-name "Blog location: " obraz:last-blog-location)
+    (read-directory-name "Blog location: " obraz-last-blog-location)
     (read-string "Post title: ")
     (read-string "Tags (white-space-separated): ")))
   ;; "DBlog location: \nsPost title: \nsTags (white-space separated): "
@@ -104,11 +104,11 @@
          (file-path (expand-file-name file-name blog-path))
          (tags-list (mapcar #'downcase
                             (split-string tags "[^[:alpha:][:digit:]]"))))
-    (obraz:save-last-blog-location blog-path)
-    (obraz:open-post file-path post-title tags-list)))
+    (obraz-save-last-blog-location blog-path)
+    (obraz-open-post file-path post-title tags-list)))
 
 
-(defun obraz:parse-header (header)
+(defun obraz-parse-header (header)
   (save-match-data
     (let* ((title (and (string-match "title: \\([^\r\n]+\\)" header)
                        (match-string 1 header)))
@@ -118,7 +118,7 @@
         (date  ,date)))))
 
 
-(defun obraz:read-header (file-path)
+(defun obraz-read-header (file-path)
   "Read YAML header, return an assoc-list."
   (let ((header-str
          (if (file-readable-p file-path)
@@ -127,10 +127,10 @@
                (re-search-forward "^---" 1024 'noerror 2)
                (buffer-substring-no-properties (point-min) (line-end-position)))
            "")))
-    (cons `(file ,file-path) (obraz:parse-header header-str))))
+    (cons `(file ,file-path) (obraz-parse-header header-str))))
 
 
-(defun obraz:fix-date (post)
+(defun obraz-fix-date (post)
   "If date is missing, guess it from the file name."
   (if (not (cadr (assoc 'date post)))
       (save-match-data
@@ -141,34 +141,34 @@
     post))
 
 
-(defun obraz:read-posts-meta (blog-path)
+(defun obraz-read-posts-meta (blog-path)
   "Read YAML headers of all posts in blog-path."
   (let* ((posts-path (concat blog-path "/_posts/"))
          (files (directory-files posts-path 't "[:digit:]+.*\.md$"))
-         (posts (mapcar #'obraz:read-header files)))
-    (mapcar #'obraz:fix-date posts)))
+         (posts (mapcar #'obraz-read-header files)))
+    (mapcar #'obraz-fix-date posts)))
 
 
-(defun obraz:new-toc-buffer (blog-path)
+(defun obraz-new-toc-buffer (blog-path)
   "Create a buffer for a new list of posts."
-  (let* ((buf (generate-new-buffer (concat "obraz:posts " blog-path))))
+  (let* ((buf (generate-new-buffer (concat "obraz-posts " blog-path))))
     buf))
 
 
-(defun obraz:find-toc-buffer (blog-path)
+(defun obraz-find-toc-buffer (blog-path)
   "Find an open buffer with a list of posts."
-  (get-buffer (concat "obraz:posts " blog-path)))
+  (get-buffer (concat "obraz-posts " blog-path)))
 
 
-(defun obraz:read-list-of-posts (&optional blog-path)
+(defun obraz-read-list-of-posts (&optional blog-path)
   "(Re)reads the list of posts in reversed chronological order into the current buffer."
   (cl-flet ((get (k alist) (cadr (assoc k alist)))
             (newest-first (a b) (string< (get 'date b) (get 'date a)))
             (trim (s) (replace-regexp-in-string "[ \t\"]+$" ""
                        (replace-regexp-in-string "^[ \t\"]+" "" s))))
     (let* ((blog-path (or blog-path
-                          (when (boundp 'obraz:buffer-blog-path) obraz:buffer-blog-path)))
-           (posts (obraz:read-posts-meta blog-path))
+                          (when (boundp 'obraz-buffer-blog-path) obraz-buffer-blog-path)))
+           (posts (obraz-read-posts-meta blog-path))
            (sorted-posts (sort posts #'newest-first)))
       (when blog-path
         (setq buffer-read-only nil)
@@ -176,15 +176,15 @@
         (dolist (p sorted-posts)
           (let ((label (format "%s  %s\n" (get 'date p) (trim (get 'title p)))))
             (insert-button label
-                           'action (lambda (x) (obraz:open-post (button-get x 'file)))
+                           'action (lambda (x) (obraz-open-post (button-get x 'file)))
                            'file   (get 'file p)
                            'face   `((:underline nil)))
             (goto-char (point-min))))
         (let ((new-post-label (format "%s  %s\n" "---------- --:--:--" "< Write a new post >")))
           (insert-button new-post-label
                          'action (lambda (x)
-                                   (let ((obraz:last-blog-location (button-get x 'blog-path)))
-                                     (call-interactively 'obraz:new-post)))
+                                   (let ((obraz-last-blog-location (button-get x 'blog-path)))
+                                     (call-interactively 'obraz-new-post)))
                          'blog-path blog-path
                          'face   `((:underline nil)))
           (goto-char (point-min)))
@@ -193,29 +193,29 @@
         (obraz-toc-mode)))))
 
 
-(defun obraz:list-posts (blog-path)
+(defun obraz-list-posts (blog-path)
   "List existing blog posts in reversed chronological order."
   (interactive
    (list
-    (read-directory-name "Blog location: " obraz:last-blog-location)))
-  (let* ((buf (or (obraz:find-toc-buffer blog-path)
-                  (obraz:new-toc-buffer blog-path)))
-         (buf-path (make-local-variable 'obraz:buffer-blog-path)))
+    (read-directory-name "Blog location: " obraz-last-blog-location)))
+  (let* ((buf (or (obraz-find-toc-buffer blog-path)
+                  (obraz-new-toc-buffer blog-path)))
+         (buf-path (make-local-variable 'obraz-buffer-blog-path)))
     (switch-to-buffer buf)
-    (setq obraz:buffer-blog-path blog-path)
-    (obraz:read-list-of-posts blog-path)
-    (obraz:save-last-blog-location blog-path)))
+    (setq obraz-buffer-blog-path blog-path)
+    (obraz-read-list-of-posts blog-path)
+    (obraz-save-last-blog-location blog-path)))
 
 
-(defun obraz:build ()
+(defun obraz-build ()
   "Build current blog."
   (interactive)
-  (let* ((buffer-path (or (buffer-file-name) obraz:buffer-blog-path))
+  (let* ((buffer-path (or (buffer-file-name) obraz-buffer-blog-path))
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
          ;; TODO: quote whitespace in obraz-py-path and blog-path
          (cmd         (mapconcat 'identity
-                                 `("python" ,obraz:obraz-py-path
+                                 `("python" ,obraz-obraz-py-path
                                    "build"
                                    "-s" ,blog-path
                                    "-d" ,(concat blog-path "/_site/"))
@@ -225,15 +225,15 @@
        (compile cmd))))
 
 
-(defun obraz:serve ()
+(defun obraz-serve ()
   "Build and serve current blog."
   (interactive)
-  (let* ((buffer-path (or (buffer-file-name) obraz:buffer-blog-path))
+  (let* ((buffer-path (or (buffer-file-name) obraz-buffer-blog-path))
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
          ;; TODO: quote whitespace in obraz-py-path and blog-path
          (cmd         (mapconcat 'identity
-                                 `("python" ,obraz:obraz-py-path
+                                 `("python" ,obraz-obraz-py-path
                                    "serve"
                                    "-w"
                                    "-s" ,blog-path
@@ -251,7 +251,7 @@
             (define-key obraz-toc-mode-map "r" (lambda ()
                                                  (interactive)
                                                  (let ((lines (line-number-at-pos (point))))
-                                                   (obraz:read-list-of-posts)
+                                                   (obraz-read-list-of-posts)
                                                    (forward-line (- lines 1)))))
             (if (fboundp 'hl-line-mode)
                 (hl-line-mode 't))
