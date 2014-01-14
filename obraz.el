@@ -203,6 +203,7 @@
          (buf-path (make-local-variable 'obraz-buffer-blog-path)))
     (switch-to-buffer buf)
     (setq obraz-buffer-blog-path blog-path)
+    (setq default-directory blog-path)
     (obraz-read-list-of-posts blog-path)
     (obraz-save-last-blog-location blog-path)))
 
