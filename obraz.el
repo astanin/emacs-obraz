@@ -57,7 +57,7 @@
   :type 'directory)
 
 
-(defcustom obraz-obraz-py-path ""
+(defcustom obraz-script-path ""
   "/path/to/obraz.py"
   :group 'obraz
   :type 'file)
@@ -221,7 +221,7 @@
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
          (cmd         (mapconcat 'identity
-                                 `("python" ,(obraz-quote-path obraz-obraz-py-path)
+                                 `("python" ,(obraz-quote-path obraz-script-path)
                                    "build"
                                    "-s" ,(obraz-quote-path blog-path)
                                    "-d" ,(obraz-quote-path (concat blog-path "/_site/")))
@@ -238,7 +238,7 @@
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
          (cmd         (mapconcat 'identity
-                                 `("python" ,(obraz-quote-path obraz-obraz-py-path)
+                                 `("python" ,(obraz-quote-path obraz-script-path)
                                    "serve"
                                    "-w"
                                    "-s" ,(obraz-quote-path blog-path)
