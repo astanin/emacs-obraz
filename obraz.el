@@ -45,7 +45,7 @@
 
 
 (defcustom obraz-post-template
-  "---\ntitle: %s\ndate: %s\ntags: %s\nlayout: post\npublished: false\n\n---\n\n"
+  "---\ntitle: %s\ndate: %s\ntags: %s\nlayout: post\n\n---\n\n"
   "Default template of a new post."
   :group 'obraz
   :type 'string)
