@@ -209,7 +209,9 @@
 
 (defun obraz-quote-path (fname)
   "Quote whitespace in a file name."
-  (let* ((qfname (replace-regexp-in-string "\"" "\\\\\"" fname)))
+  (let* ((qfname (replace-regexp-in-string
+                  "\"" "\\\\\""
+                  (expand-file-name fname))))
     (concat "\"" qfname "\"")))
 
 
