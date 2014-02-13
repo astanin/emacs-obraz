@@ -96,7 +96,6 @@
     (read-directory-name "Blog location: " obraz-last-blog-location)
     (read-string "Post title: ")
     (read-string "Tags (white-space-separated): ")))
-  ;; "DBlog location: \nsPost title: \nsTags (white-space separated): "
   (let* ((file-name (format "_posts/%s-%s.md"
                             (format-time-string "%Y-%m-%d")
                             (downcase (replace-regexp-in-string
