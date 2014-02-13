@@ -143,7 +143,7 @@
 (defun obraz-read-posts-meta (blog-path)
   "Read YAML headers of all posts in blog-path."
   (let* ((posts-path (concat blog-path "/_posts/"))
-         (files (directory-files posts-path 't "[:digit:]+.*\.md$"))
+         (files (directory-files posts-path 't "[:digit:-]+.*\.md$"))
          (posts (mapcar #'obraz-read-header files)))
     (mapcar #'obraz-fix-date posts)))
 
