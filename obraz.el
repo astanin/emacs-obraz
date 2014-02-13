@@ -208,18 +208,23 @@
     (obraz-save-last-blog-location blog-path)))
 
 
+(defun obraz-quote-path (fname)
+  "Quote whitespace in a file name."
+  (let* ((qfname (replace-regexp-in-string "\"" "\\\\\"" fname)))
+    (concat "\"" qfname "\"")))
+
+
 (defun obraz-build ()
   "Build current blog."
   (interactive)
   (let* ((buffer-path (or (buffer-file-name) obraz-buffer-blog-path))
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
-         ;; TODO: quote whitespace in obraz-py-path and blog-path
          (cmd         (mapconcat 'identity
-                                 `("python" ,obraz-obraz-py-path
+                                 `("python" ,(obraz-quote-path obraz-obraz-py-path)
                                    "build"
-                                   "-s" ,blog-path
-                                   "-d" ,(concat blog-path "/_site/"))
+                                   "-s" ,(obraz-quote-path blog-path)
+                                   "-d" ,(obraz-quote-path (concat blog-path "/_site/")))
                                  " ")))
     (message cmd)
     (when blog-path
@@ -232,13 +237,12 @@
   (let* ((buffer-path (or (buffer-file-name) obraz-buffer-blog-path))
          (blog-path   (file-name-directory
                        (locate-dominating-file buffer-path "_posts")))
-         ;; TODO: quote whitespace in obraz-py-path and blog-path
          (cmd         (mapconcat 'identity
-                                 `("python" ,obraz-obraz-py-path
+                                 `("python" ,(obraz-quote-path obraz-obraz-py-path)
                                    "serve"
                                    "-w"
-                                   "-s" ,blog-path
-                                   "-d" ,(concat blog-path "/_site/"))
+                                   "-s" ,(obraz-quote-path blog-path)
+                                   "-d" ,(obraz-quote-path (concat blog-path "/_site/")))
                                  " ")))
     (message cmd)
     (when blog-path
